@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>VoxGrid — Voice Rooms</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+<header>
+  <div class="logo">VOXGRID</div>
+  <div class="header-meta" id="server-status">CONNECTING...</div>
+</header>
+
+<div class="container">
+
+  <!-- Create Room -->
+  <div class="section-label">NEW CHANNEL</div>
+  <div class="card">
+    <div class="create-row">
+      <input type="text" id="room-name-input" placeholder="channel name..." maxlength="32" />
+      <input type="text" id="username-create" placeholder="your callsign..." maxlength="20" style="max-width:180px;" />
+      <button class="btn btn-primary" onclick="createRoom()">▶ CREATE</button>
+    </div>
+  </div>
+
+  <!-- Room List -->
+  <div class="section-label" style="margin-top:1.8rem;">LIVE CHANNELS</div>
+  <div id="room-list">
+    <div class="empty-state">// no active channels — be the first to transmit</div>
+  </div>
+
+</div>
+
+<!-- Join modal overlay -->
+<div id="join-modal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.7); z-index:200; align-items:center; justify-content:center;">
+  <div class="card" style="width:320px; position:relative;">
+    <div class="section-label">JOIN CHANNEL</div>
+    <p style="font-family:var(--mono); color:var(--accent); font-size:0.9rem; margin-bottom:1rem;" id="join-room-label"></p>
+    <input type="text" id="username-join" placeholder="your callsign..." maxlength="20" style="margin-bottom:0.8rem;" />
+    <div style="display:flex; gap:0.6rem;">
+      <button class="btn btn-primary" onclick="confirmJoin()" style="flex:1;">▶ JOIN</button>
+      <button class="btn btn-ghost" onclick="closeModal()">CANCEL</button>
+    </div>
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<script src="/socket.io/socket.io.js"></script>
+<script src="app.js"></script>
+</body>
+</html>

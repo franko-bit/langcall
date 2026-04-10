@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>VoxGrid — Room</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+<header>
+  <div class="logo">VOXGRID</div>
+  <div class="header-meta" id="conn-status">CONNECTING...</div>
+</header>
+
+<div class="container">
+
+  <!-- Room Header -->
+  <div class="room-header">
+    <div>
+      <div class="room-title" id="room-title">LOADING...</div>
+      <div class="room-id-badge" id="room-id-badge"></div>
+    </div>
+    <button class="btn btn-danger" onclick="leaveRoom()">✕ LEAVE</button>
+  </div>
+
+  <div class="card" style="margin-bottom:1.5rem;">
+    <div class="section-label">SHARE LINK</div>
+    <div class="create-row">
+      <input type="text" id="share-link-input" readonly style="background:#090a0c; color:var(--text);" />
+      <button class="btn btn-ghost" onclick="copyShareLink()">COPY</button>
+    </div>
+  </div>
+
+  <!-- Participants -->
+  <div class="section-label">PARTICIPANTS</div>
+  <div id="participants-list">
+    <!-- filled by JS -->
+  </div>
+
+  <!-- Controls -->
+  <div class="section-label" style="margin-top:1.5rem;">CONTROLS</div>
+  <div class="card">
+    <div class="controls">
+      <button class="btn-mute" id="mute-btn" onclick="toggleMute()">
+        🎙 MIC ON
+      </button>
+      <div class="status-bar" id="audio-status">INITIALIZING AUDIO...</div>
+    </div>
+  </div>
+
+</div>
+
+<!-- Hidden audio elements for remote streams -->
+<div id="audio-elements" style="display:none;"></div>
+
+<div id="toast"></div>
+
+<script src="/socket.io/socket.io.js"></script>
+<script src="room.js"></script>
+</body>
+</html>

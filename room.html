@@ -2,60 +2,842 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>VoxGrid — Room</title>
-  <link rel="stylesheet" href="style.css" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>LinguaGrid — Immersive Voice Rooms</title>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=Syne:wght@400;500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg0: #0a0a0a;
+      --bg1: rgba(17,17,17,0.85);
+      --bg2: rgba(22,22,22,0.7);
+      --bg3: rgba(28,28,28,0.6);
+      --bg4: rgba(34,34,34,0.5);
+      --border: rgba(255,255,255,0.08);
+      --border2: rgba(255,255,255,0.12);
+      --text1: #e8e5de;
+      --text2: #b4b0a6;
+      --text3: #6b6b64;
+      --accent: #c8f04a;
+      --accent-dim: #8aaa2a;
+      --accent-bg: rgba(200,240,74,0.1);
+      --accent-border: rgba(200,240,74,0.25);
+      --blue: #4ab8f0;
+      --orange: #f0a84a;
+      --pink: #f04ab4;
+      --purple: #a84af0;
+      --red: #ff5a5a;
+      --mono: 'JetBrains Mono', monospace;
+      --sans: 'Syne', sans-serif;
+      --header-h: 60px;
+      --bottom-nav-h: 74px;
+    }
+
+    body {
+      background: 
+        radial-gradient(ellipse at 15% 0%, rgba(200,240,74,0.1) 0%, transparent 55%),
+        radial-gradient(ellipse at 90% 100%, rgba(74,184,240,0.07) 0%, transparent 60%),
+        var(--bg0);
+      color: var(--text1);
+      font-family: var(--sans);
+      font-size: 14px;
+      line-height: 1.5;
+      overflow: hidden;
+      height: 100dvh;
+    }
+
+    /* App Shell */
+    .app {
+      display: flex;
+      flex-direction: column;
+      height: 100%;
+      overflow: hidden;
+    }
+
+    /* Header */
+    header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 20px;
+      height: var(--header-h);
+      background: rgba(17,17,17,0.9);
+      backdrop-filter: blur(12px);
+      border-bottom: 0.5px solid var(--border);
+      flex-shrink: 0;
+      z-index: 20;
+    }
+
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 13px;
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      color: var(--text1);
+    }
+
+    .logo-dot {
+      width: 10px; height: 10px;
+      border-radius: 50%;
+      background: var(--accent);
+      box-shadow: 0 0 12px var(--accent);
+      animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+      0%,100% { opacity: 1; box-shadow: 0 0 8px var(--accent); }
+      50% { opacity: 0.6; box-shadow: 0 0 3px var(--accent); }
+    }
+
+    .hdr-room-title {
+      font-size: 12px;
+      font-weight: 500;
+      color: var(--text2);
+      text-align: center;
+      overflow: hidden;
+      white-space: nowrap;
+      text-overflow: ellipsis;
+    }
+
+    .hdr-right {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .conn-badge {
+      font-family: var(--mono);
+      font-size: 10px;
+      color: var(--accent);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .conn-badge::before {
+      content: '';
+      width: 6px; height: 6px;
+      border-radius: 50%;
+      background: var(--accent);
+      animation: pulse 2s infinite;
+    }
+
+    .btn-leave {
+      background: transparent;
+      border: 0.5px solid var(--border2);
+      color: var(--text3);
+      border-radius: 8px;
+      padding: 6px 14px;
+      font-family: var(--sans);
+      font-size: 11px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+
+    .btn-leave:hover { border-color: var(--red); color: var(--red); background: rgba(255,90,90,0.1); }
+
+    /* Body */
+    .body {
+      display: flex;
+      flex: 1;
+      overflow: hidden;
+    }
+
+    /* Main scroll area */
+    .main {
+      flex: 1;
+      overflow-y: auto;
+      padding: 20px 22px 90px;
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+    }
+
+    .main::-webkit-scrollbar { width: 4px; }
+    .main::-webkit-scrollbar-thumb { background: var(--bg4); border-radius: 4px; }
+
+    /* Section label */
+    .sec-label {
+      font-family: var(--mono);
+      font-size: 10px;
+      color: var(--text3);
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      margin-bottom: 8px;
+    }
+
+    /* Objective banner */
+    .obj-banner {
+      background: var(--bg2);
+      backdrop-filter: blur(8px);
+      border: 0.5px solid var(--border);
+      border-radius: 18px;
+      padding: 16px 18px;
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 12px;
+    }
+
+    .obj-title {
+      font-size: 16px;
+      font-weight: 700;
+      margin-bottom: 5px;
+    }
+
+    .obj-sub {
+      font-size: 12px;
+      color: var(--text2);
+    }
+
+    .obj-tags { display: flex; gap: 6px; flex-wrap: wrap; }
+    .tag {
+      border-radius: 24px;
+      padding: 4px 12px;
+      font-size: 10px;
+      font-family: var(--mono);
+      background: var(--bg4);
+      border: 0.5px solid var(--border2);
+    }
+    .tag-green { background: var(--accent-bg); border-color: var(--accent-border); color: var(--accent-dim); }
+
+    /* Prompt box */
+    .prompt-box {
+      background: var(--accent-bg);
+      border: 0.5px solid var(--accent-border);
+      border-radius: 18px;
+      padding: 14px 16px;
+    }
+    .prompt-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 10px;
+    }
+    .prompt-label {
+      font-family: var(--mono);
+      font-size: 9px;
+      color: var(--accent-dim);
+      text-transform: uppercase;
+    }
+    .btn-sm {
+      background: transparent;
+      border: 0.5px solid var(--accent-border);
+      color: var(--accent-dim);
+      border-radius: 6px;
+      padding: 4px 10px;
+      font-family: var(--mono);
+      font-size: 10px;
+      cursor: pointer;
+    }
+    .btn-sm:hover { background: rgba(200,240,74,0.1); color: var(--accent); }
+    .prompt-text {
+      font-size: 13px;
+      color: #d0e0b0;
+      line-height: 1.55;
+    }
+
+    /* Participants grid with circular avatars */
+    .participants {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(85px, 1fr));
+      gap: 12px;
+    }
+    .participant-card {
+      background: var(--bg2);
+      backdrop-filter: blur(4px);
+      border: 0.5px solid var(--border);
+      border-radius: 20px;
+      padding: 12px 8px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+      transition: all 0.15s;
+      position: relative;
+    }
+    .participant-card.speaking { border-color: var(--accent); background: #1a240c; }
+    .avatar-circle {
+      width: 56px;
+      height: 56px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      font-size: 22px;
+      font-family: var(--sans);
+      color: #0a0a0a;
+      position: relative;
+      transition: transform 0.1s;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+    }
+    .participant-name {
+      font-size: 11px;
+      font-weight: 500;
+      color: var(--text2);
+      text-align: center;
+      max-width: 80px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .role-badge {
+      font-size: 8px;
+      font-family: var(--mono);
+      padding: 2px 8px;
+      border-radius: 20px;
+      background: var(--bg4);
+      color: var(--text3);
+    }
+    .kick-btn {
+      position: absolute;
+      top: -8px;
+      right: -8px;
+      width: 24px;
+      height: 24px;
+      background: var(--red);
+      border: none;
+      border-radius: 50%;
+      color: white;
+      font-size: 12px;
+      font-weight: bold;
+      cursor: pointer;
+      opacity: 0;
+      transition: opacity 0.1s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+    }
+    .participant-card:hover .kick-btn { opacity: 1; }
+    .kick-btn:hover { background: #ff3333; transform: scale(1.05); }
+
+    /* Controls */
+    .controls-card {
+      background: var(--bg2);
+      backdrop-filter: blur(8px);
+      border: 0.5px solid var(--border);
+      border-radius: 20px;
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+    .controls-row { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+    .btn-mute {
+      background: var(--accent);
+      border: none;
+      border-radius: 40px;
+      padding: 10px 22px;
+      font-weight: 700;
+      font-size: 13px;
+      cursor: pointer;
+      transition: all 0.1s;
+    }
+    .btn-mute.muted { background: var(--bg4); color: var(--text3); }
+    .audio-status { font-family: var(--mono); font-size: 10px; color: var(--text3); }
+    .share-row { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+    .share-input {
+      flex: 1;
+      background: var(--bg1);
+      border: 0.5px solid var(--border);
+      border-radius: 40px;
+      padding: 10px 14px;
+      font-size: 11px;
+      font-family: var(--mono);
+      color: var(--text2);
+      outline: none;
+    }
+    .btn-copy {
+      background: transparent;
+      border: 0.5px solid var(--border2);
+      border-radius: 40px;
+      padding: 8px 18px;
+      font-size: 12px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.15s;
+    }
+    .btn-copy:hover { border-color: var(--accent); color: var(--accent); background: var(--accent-bg); }
+
+    /* Sidebar */
+    .sidebar {
+      width: 260px;
+      background: rgba(17,17,17,0.7);
+      backdrop-filter: blur(12px);
+      border-left: 0.5px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      flex-shrink: 0;
+    }
+    .safety-bar {
+      background: #121a08;
+      padding: 12px;
+      font-size: 10px;
+      color: var(--accent-dim);
+      border-bottom: 0.5px solid var(--accent-border);
+    }
+    .sidebar-tabs { display: flex; border-bottom: 0.5px solid var(--border); }
+    .s-tab {
+      flex: 1;
+      padding: 12px 0;
+      background: transparent;
+      border: none;
+      color: var(--text3);
+      font-family: var(--sans);
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      border-bottom: 2px solid transparent;
+    }
+    .s-tab.active { color: var(--accent); border-bottom-color: var(--accent); }
+    .sidebar-pane { display: none; flex: 1; flex-direction: column; overflow: hidden; }
+    .sidebar-pane.active { display: flex; }
+    .pane-inner {
+      flex: 1;
+      overflow-y: auto;
+      padding: 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .vocab-card, .grammar-card {
+      background: var(--bg3);
+      border: 0.5px solid var(--border);
+      border-radius: 14px;
+      padding: 12px;
+      cursor: pointer;
+      transition: border-color 0.1s;
+    }
+    .vocab-card:hover { border-color: var(--accent-border); }
+    .vocab-word { font-size: 13px; font-weight: 700; margin-bottom: 3px; }
+    .vocab-def { font-size: 11px; color: var(--text2); }
+    .empty-note { font-family: var(--mono); font-size: 10px; color: var(--text3); text-align: center; padding: 20px; }
+
+    /* Bottom Nav (mobile) */
+    .bottom-nav {
+      display: none;
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: var(--bottom-nav-h);
+      background: rgba(17,17,17,0.95);
+      backdrop-filter: blur(12px);
+      border-top: 0.5px solid var(--border);
+      z-index: 50;
+    }
+    .bottom-nav-inner { display: flex; height: 100%; }
+    .nav-btn {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 4px;
+      background: transparent;
+      border: none;
+      color: var(--text3);
+      font-family: var(--mono);
+      font-size: 9px;
+      cursor: pointer;
+    }
+    .nav-btn.active { color: var(--accent); }
+    .nav-icon { font-size: 20px; }
+
+    /* Mobile panels */
+    .mobile-panel {
+      display: none;
+      position: fixed;
+      top: var(--header-h);
+      bottom: var(--bottom-nav-h);
+      left: 0;
+      right: 0;
+      background: rgba(17,17,17,0.96);
+      backdrop-filter: blur(16px);
+      z-index: 40;
+      flex-direction: column;
+      overflow: hidden;
+    }
+    .mobile-panel.open { display: flex; }
+    .mobile-panel-header {
+      display: flex;
+      justify-content: space-between;
+      padding: 14px 18px;
+      border-bottom: 0.5px solid var(--border);
+    }
+
+    /* Modals */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.85);
+      backdrop-filter: blur(8px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 300;
+    }
+    .modal-card {
+      background: var(--bg2);
+      border: 0.5px solid var(--border2);
+      border-radius: 28px;
+      padding: 24px 28px;
+      width: 90%;
+      max-width: 420px;
+    }
+    .modal-title {
+      font-family: var(--mono);
+      font-size: 11px;
+      color: var(--accent);
+      margin-bottom: 16px;
+    }
+    .form-label {
+      font-size: 10px;
+      text-transform: uppercase;
+      color: var(--text3);
+      margin-top: 12px;
+      display: block;
+    }
+    .modal-card input, .modal-card select {
+      width: 100%;
+      background: var(--bg1);
+      border: 0.5px solid var(--border);
+      border-radius: 14px;
+      padding: 12px;
+      color: var(--text1);
+      font-size: 14px;
+      margin-top: 5px;
+    }
+    .modal-actions { display: flex; gap: 12px; margin-top: 24px; }
+    .btn-primary {
+      flex: 1;
+      background: var(--accent);
+      border: none;
+      border-radius: 40px;
+      padding: 12px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+    .btn-ghost {
+      background: transparent;
+      border: 0.5px solid var(--border2);
+      border-radius: 40px;
+      padding: 12px 20px;
+      color: var(--text2);
+      cursor: pointer;
+    }
+    #toast {
+      position: fixed;
+      bottom: 90px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: var(--accent);
+      color: #0a0a0a;
+      padding: 10px 24px;
+      border-radius: 40px;
+      font-family: var(--mono);
+      font-size: 12px;
+      font-weight: 600;
+      opacity: 0;
+      transition: opacity 0.2s;
+      pointer-events: none;
+      z-index: 999;
+      white-space: nowrap;
+    }
+    @media (max-width: 700px) {
+      .sidebar { display: none; }
+      .bottom-nav { display: block; }
+      .main { padding: 16px 14px 90px; }
+      .participants { grid-template-columns: repeat(2, 1fr); }
+      .obj-banner { flex-direction: column; }
+    }
+  </style>
 </head>
 <body>
-
-<header>
-  <div class="logo">VOXGRID</div>
-  <div class="header-meta" id="conn-status">CONNECTING...</div>
-</header>
-
-<div class="container">
-
-  <!-- Room Header -->
-  <div class="room-header">
-    <div>
-      <div class="room-title" id="room-title">LOADING...</div>
-      <div class="room-id-badge" id="room-id-badge"></div>
+<div class="app">
+  <header>
+    <div class="logo"><span class="logo-dot"></span>LINGUAGRID</div>
+    <div class="hdr-room-title" id="hdrRoomTitle">Airport Check-in</div>
+    <div class="hdr-right">
+      <div class="conn-badge" id="connBadge">LIVE · 0</div>
+      <button class="btn-leave" onclick="leaveRoom()">✕ Leave</button>
     </div>
-    <button class="btn btn-danger" onclick="leaveRoom()">✕ LEAVE</button>
-  </div>
+  </header>
 
-  <div class="card" style="margin-bottom:1.5rem;">
-    <div class="section-label">SHARE LINK</div>
-    <div class="create-row">
-      <input type="text" id="share-link-input" readonly style="background:#090a0c; color:var(--text);" />
-      <button class="btn btn-ghost" onclick="copyShareLink()">COPY</button>
+  <div class="body">
+    <div class="main">
+      <div>
+        <div class="sec-label">Session objective</div>
+        <div class="obj-banner">
+          <div>
+            <div class="obj-title" id="roomTitle">Airport Check-in & Baggage</div>
+            <div class="obj-sub" id="roomSub">Practice polite requests and travel vocabulary</div>
+          </div>
+          <div class="obj-tags" id="objTags"><span class="tag tag-green">B1 · Travel</span></div>
+        </div>
+      </div>
+
+      <div class="prompt-box">
+        <div class="prompt-header">
+          <span class="prompt-label">🎯 Conversation prompt</span>
+          <div><button class="btn-sm" onclick="nextPrompt()">↻ Next</button></div>
+        </div>
+        <div class="prompt-text" id="promptText">"Could I have a window seat, please?" — Practice making polite requests at the check-in counter.</div>
+      </div>
+
+      <div>
+        <div class="sec-label">👥 Participants</div>
+        <div class="participants" id="participantsGrid"></div>
+      </div>
+
+      <div>
+        <div class="sec-label">🎛️ Controls</div>
+        <div class="controls-card">
+          <div class="controls-row">
+            <button class="btn-mute" id="muteBtn" onclick="toggleMute()">🎙 Mic on</button>
+            <div class="audio-status" id="audioStatus">🔊 48kHz · 2 active</div>
+          </div>
+          <div class="share-row">
+            <input class="share-input" id="share-link-input" value="" readonly />
+            <button class="btn-copy" onclick="copyLink()">📋 Copy link</button>
+          </div>
+        </div>
+      </div>
     </div>
+
+    <aside class="sidebar">
+      <div class="safety-bar">✨ Safe space — mistakes welcome. Try one sentence.</div>
+      <div class="sidebar-tabs">
+        <button class="s-tab active" onclick="switchSidebar('vocab', this)">📖 Vocab</button>
+        <button class="s-tab" onclick="switchSidebar('grammar', this)">📐 Grammar</button>
+      </div>
+      <div class="sidebar-pane active" id="sideVocab">
+        <div class="pane-inner" id="vocabListDesktop"><div class="empty-note">// capture words from conversation</div></div>
+      </div>
+      <div class="sidebar-pane" id="sideGrammar">
+        <div class="pane-inner" id="grammarListDesktop"><div class="empty-note">// grammar patterns will appear</div></div>
+      </div>
+    </aside>
   </div>
 
-  <!-- Participants -->
-  <div class="section-label">PARTICIPANTS</div>
-  <div id="participants-list">
-    <!-- filled by JS -->
-  </div>
-
-  <!-- Controls -->
-  <div class="section-label" style="margin-top:1.5rem;">CONTROLS</div>
-  <div class="card">
-    <div class="controls">
-      <button class="btn-mute" id="mute-btn" onclick="toggleMute()">
-        🎙 MIC ON
-      </button>
-      <div class="status-bar" id="audio-status">INITIALIZING AUDIO...</div>
+  <nav class="bottom-nav">
+    <div class="bottom-nav-inner">
+      <button class="nav-btn active" onclick="switchMobilePanel('room')"><span class="nav-icon">◈</span>Room</button>
+      <button class="nav-btn" onclick="switchMobilePanel('vocab')"><span class="nav-icon">⬡</span>Vocab</button>
+      <button class="nav-btn" onclick="switchMobilePanel('grammar')"><span class="nav-icon">⬟</span>Grammar</button>
+      <button class="nav-btn" onclick="toggleMute()"><span class="nav-icon" id="mobileMicIcon">🎙</span>Mic</button>
     </div>
+  </nav>
+
+  <div class="mobile-panel" id="mobileVocabPanel">
+    <div class="mobile-panel-header"><span>📖 Vocabulary</span><button class="btn-sm" onclick="switchMobilePanel('room')">✕ Close</button></div>
+    <div class="pane-inner" id="vocabListMobile"><div class="empty-note">// capture words</div></div>
+  </div>
+  <div class="mobile-panel" id="mobileGrammarPanel">
+    <div class="mobile-panel-header"><span>📐 Grammar</span><button class="btn-sm" onclick="switchMobilePanel('room')">✕ Close</button></div>
+    <div class="pane-inner" id="grammarListMobile"><div class="empty-note">// patterns appear here</div></div>
   </div>
 
+  <div id="toast"></div>
 </div>
 
-<!-- Hidden audio elements for remote streams -->
-<div id="audio-elements" style="display:none;"></div>
+<script>
+  // ---------- STATE ----------
+  // Initialize roomsData from sessionStorage (set by app.js)
+  const sessionRoomName = sessionStorage.getItem('roomName') || 'Language Room';
+  const sessionScenario = sessionStorage.getItem('scenario') || sessionRoomName;
+  const sessionLevel = sessionStorage.getItem('cefrLevel') || 'B1';
+  const sessionFunc = sessionStorage.getItem('targetFunction') || 'conversation practice';
+  const sessionUsername = sessionStorage.getItem('username') || 'Participant';
+  
+  let roomsData = [
+    { id: "room1", name: sessionRoomName, scenario: sessionScenario, level: sessionLevel, func: sessionFunc, participants: [
+      { id: "p1", name: sessionUsername, role: "native", avatarColor: "#c8f04a" }
+    ]}
+  ];
+  let currentRoomId = "room1";
+  let localParticipantId = "p1";
+  let isMuted = false;
+  let vocabItems = [{ word: "practice", def: "repeated exercise", context: "language learning" }];
+  let grammarItems = [{ label: "Conversation", pattern: "Speak freely", example: "Share your ideas" }];
 
-<div id="toast"></div>
+  function getInitials(name) {
+    const parts = name.trim().split(/\s+/);
+    if (parts.length === 1) return parts[0].charAt(0).toUpperCase();
+    return (parts[0].charAt(0) + parts[parts.length-1].charAt(0)).toUpperCase();
+  }
 
+  function getRoleLabel(role) {
+    if (role === 'native') return 'Native';
+    if (role === 'advanced') return 'Advanced';
+    if (role === 'beginner') return 'Beginner';
+    return 'Learner';
+  }
+
+  function renderParticipants() {
+    const room = roomsData.find(r => r.id === currentRoomId);
+    if (!room) return;
+    const container = document.getElementById("participantsGrid");
+    if (!container) return;
+    container.innerHTML = room.participants.map(p => `
+      <div class="participant-card" data-pid="${p.id}">
+        <div class="avatar-circle" style="background: ${p.avatarColor || '#4a9eff'}; color: #0a0a0a;">${getInitials(p.name)}</div>
+        <div class="participant-name">${escapeHtml(p.name.split(' ')[0])}</div>
+        <div class="role-badge">${getRoleLabel(p.role)}</div>
+        ${localParticipantId === room.participants[0]?.id ? `<button class="kick-btn" onclick="kickParticipant('${p.id}')">✕</button>` : ''}
+      </div>
+    `).join("");
+    document.getElementById("connBadge").innerHTML = `LIVE · ${room.participants.length}`;
+    document.getElementById("hdrRoomTitle").innerText = room.name;
+    document.getElementById("roomTitle").innerText = room.name;
+  }
+
+  function kickParticipant(participantId) {
+    const room = roomsData.find(r => r.id === currentRoomId);
+    if (!room) return;
+    const hostId = room.participants[0]?.id;
+    if (localParticipantId !== hostId) { showToast("Only host can remove participants"); return; }
+    const idx = room.participants.findIndex(p => p.id === participantId);
+    if (idx !== -1 && participantId !== hostId) {
+      room.participants.splice(idx, 1);
+      renderParticipants();
+      showToast("Participant removed");
+      updateSidebars();
+    } else if (participantId === hostId) {
+      showToast("Cannot remove yourself as host");
+    }
+  }
+
+  function joinRoom() {
+    const room = roomsData.find(r => r.id === currentRoomId);
+    if (!room) return;
+    // User is already authenticated via login, use their logged-in name from session
+    const newId = "p_" + Date.now();
+    const newPart = { id: newId, name: "Participant", role: "beginner", avatarColor: `hsl(${Math.random() * 360}, 55%, 50%)` };
+    room.participants.push(newPart);
+    localParticipantId = newId;
+    renderParticipants();
+    showToast(`✨ Joined room!`);
+    updateSidebars();
+  }
+
+  function leaveRoom() {
+    if (!localParticipantId) { joinRoom(); return; }
+    const room = roomsData.find(r => r.id === currentRoomId);
+    if (room) {
+      const idx = room.participants.findIndex(p => p.id === localParticipantId);
+      if (idx !== -1) room.participants.splice(idx, 1);
+      localParticipantId = null;
+      renderParticipants();
+      showToast("You left the room");
+      if (room.participants.length === 0) showToast("Room is empty, create new session");
+    }
+  }
+
+  function toggleMute() {
+    isMuted = !isMuted;
+    const btn = document.getElementById("muteBtn");
+    const mobileIcon = document.getElementById("mobileMicIcon");
+    if (isMuted) {
+      btn.innerText = "🔇 Mic off";
+      btn.classList.add("muted");
+      if (mobileIcon) mobileIcon.innerText = "🔇";
+      showToast("Microphone muted");
+    } else {
+      btn.innerText = "🎙 Mic on";
+      btn.classList.remove("muted");
+      if (mobileIcon) mobileIcon.innerText = "🎙";
+      showToast("Microphone active");
+    }
+  }
+
+  function copyLink() {
+    const input = document.getElementById("share-link-input");
+    input.select();
+    document.execCommand("copy");
+    showToast("Link copied to clipboard");
+  }
+
+  let prompts = [
+    "Could I have a window seat, please?",
+    "Is there a fee for excess baggage?",
+    "Would it be possible to upgrade my seat?",
+    "How many bags can I check in for free?"
+  ];
+  let promptIdx = 0;
+  function nextPrompt() {
+    promptIdx = (promptIdx + 1) % prompts.length;
+    document.getElementById("promptText").innerText = prompts[promptIdx];
+    showToast("New prompt loaded");
+  }
+
+  function showToast(msg) {
+    const toast = document.getElementById("toast");
+    toast.innerText = msg;
+    toast.style.opacity = "1";
+    setTimeout(() => toast.style.opacity = "0", 2200);
+  }
+
+  function updateSidebars() {
+    const vocabHtml = vocabItems.map(v => `<div class="vocab-card"><div class="vocab-word">📖 ${escapeHtml(v.word)}</div><div class="vocab-def">${escapeHtml(v.def)}</div><div class="vocab-def" style="font-size:9px;">${escapeHtml(v.context || '')}</div></div>`).join("");
+    document.getElementById("vocabListDesktop").innerHTML = vocabHtml || '<div class="empty-note">// no words yet</div>';
+    document.getElementById("vocabListMobile").innerHTML = vocabHtml || '<div class="empty-note">// no words yet</div>';
+    const grammarHtml = grammarItems.map(g => `<div class="grammar-card"><div class="vocab-word">📐 ${escapeHtml(g.label)}</div><div class="vocab-def">${escapeHtml(g.pattern)}</div><div class="vocab-def" style="font-size:9px;">${escapeHtml(g.example || '')}</div></div>`).join("");
+    document.getElementById("grammarListDesktop").innerHTML = grammarHtml || '<div class="empty-note">// no patterns</div>';
+    document.getElementById("grammarListMobile").innerHTML = grammarHtml || '<div class="empty-note">// no patterns</div>';
+  }
+
+  function switchSidebar(tab, btn) {
+    document.querySelectorAll('.s-tab').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById('sideVocab').classList.toggle('active', tab === 'vocab');
+    document.getElementById('sideGrammar').classList.toggle('active', tab === 'grammar');
+  }
+
+  function switchMobilePanel(panel) {
+    document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.remove('active'));
+    if (panel === 'room') {
+      document.getElementById('mobileVocabPanel').classList.remove('open');
+      document.getElementById('mobileGrammarPanel').classList.remove('open');
+      document.querySelector('.nav-btn').classList.add('active');
+    } else if (panel === 'vocab') {
+      document.getElementById('mobileVocabPanel').classList.add('open');
+      document.getElementById('mobileGrammarPanel').classList.remove('open');
+      document.querySelectorAll('.nav-btn')[1]?.classList.add('active');
+    } else if (panel === 'grammar') {
+      document.getElementById('mobileGrammarPanel').classList.add('open');
+      document.getElementById('mobileVocabPanel').classList.remove('open');
+      document.querySelectorAll('.nav-btn')[2]?.classList.add('active');
+    }
+  }
+
+  function escapeHtml(str) { if (!str) return ''; return str.replace(/[&<>]/g, m => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;' }[m])); }
+
+  window.addEventListener('load', () => {
+    joinRoom();
+    renderParticipants();
+    updateSidebars();
+    document.getElementById("promptText").innerText = prompts[0];
+  });
+  window.nextPrompt = nextPrompt;
+  window.toggleMute = toggleMute;
+  window.leaveRoom = leaveRoom;
+  window.copyLink = copyLink;
+  window.kickParticipant = kickParticipant;
+  window.switchSidebar = switchSidebar;
+  window.switchMobilePanel = switchMobilePanel;
+  window.showToast = showToast;
+</script>
+
+<!-- Socket.io and WebRTC logic -->
 <script src="/socket.io/socket.io.js"></script>
 <script src="room.js"></script>
 </body>
